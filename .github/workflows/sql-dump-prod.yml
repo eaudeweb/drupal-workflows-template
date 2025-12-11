@@ -15,4 +15,4 @@ jobs:
           ssh_host:             ${{ secrets.PROD_SSH_HOST }}
           ssh_key:              ${{ secrets.PROD_SSH_KEY }}
           project_dir:          ${{ vars.PROD_PROJECT_DIR }}
-          sql_dump_file:        ${{ vars.PROD_SQL_DUMP_FILE }}
+          sql_dump_file:        ${{ vars.PROD_SQL_DUMP_DIR }}/database.sql
