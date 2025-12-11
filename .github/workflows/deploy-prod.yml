@@ -1,0 +1,124 @@
+on:
+  workflow_dispatch:
+    inputs:
+      check_config:
+        type: boolean
+        description: 'Fail when configuration overridden'
+        required: true
+        default: false
+      sql_backup:
+        type: boolean
+        description: 'Create SQL backup'
+        required: true
+        default: true
+      enable_maintenance_mode:
+        type: boolean
+        description: 'Enable maintenance mode.'
+        required: true
+        default: true
+
+name: 'Deploy PROD instance'
+jobs:
+  create_release_archive:
+    name: 'Create release archive'
+    runs-on:
+      labels: 'drupal-runner-v2'
+    outputs:
+      release_filename: ${{ steps.artifact.outputs.filename }}
+    steps:
+      - name: Fail if a branch was selected
+        if: github.event_name == 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "This workflow should not be triggered with workflow_dispatch on a branch. Please choose a tag."
+          exit 1
+
+      - name: 'Checkout source code'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: 'Setup nodejs'
+        if: vars.ENABLE_NODEJS == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ vars.NODE_VERSION_FILE }}
+
+      - name: 'Install dependencies'
+        uses: eaudeweb/drupal-install-action@1.x
+        with:
+          dev: false
+
+      - name: 'Create release archive'
+        id: artifact
+        uses: eaudeweb/drupal-artifact-action@1.x
+
+  deploy_release:
+    name: 'Deploy release on the server'
+    runs-on:
+      labels: 'drupal-runner-v2'
+    needs: create_release_archive
+    steps:
+      - name: 'Deploy release on the server'
+        uses: eaudeweb/drupal-deploy-action@2.x
+        with:
+          ssh_user:           ${{ secrets.PROD_SSH_USER }}
+          ssh_host:           ${{ secrets.PROD_SSH_HOST }}
+          ssh_key:            ${{ secrets.PROD_SSH_KEY }}
+          release_id:         'release-${{ github.ref_name }}'
+          release_filename:   ${{ needs.create_release_archive.outputs.release_filename }}
+          project_dir:        ${{ vars.PROD_PROJECT_DIR }}
+          artifacts_dir:      ${{ vars.PROD_ARTIFACTS_DIR }}
+          settings_file:      ${{ vars.PROD_SETTINGS_FILE }}
+          public_files_dir:   ${{ vars.PROD_PUBLIC_FILES_DIR }}
+          robo_file:          ${{ vars.PROD_ROBO_FILE }}
+          local_services_file: ${{ vars.PROD_LOCAL_SERVICES_FILE }}
+          database_dump_dir:  ${{ vars.PROD_DATABASE_DUMP_DIR }}
+          check_config:       ${{ inputs.check_config }}
+          sql_backup:         ${{ inputs.sql_backup }}
+          artifacts_lifespan: 30
+
+  update_instance:
+    name: 'Update Drupal instance'
+    runs-on:
+      labels: 'drupal-runner-v2'
+    needs: deploy_release
+    steps:
+      - name: 'Update the Drupal instance'
+        id: release
+        uses: eaudeweb/drupal-update-action@1.x
+        with:
+          path: ${{ vars.PROD_PROJECT_DIR }}
+          enable_maintenance_mode: ${{ inputs.enable_maintenance_mode }}
+          statuscake_api_key: ${{ secrets.STATUSCAKE_API_KEY }}
+          statuscake_test_id: ${{ secrets.PROD_STATUSCAKE_ID }}
+
+      - name: 'Cleanup old releases'
+        uses: eaudeweb/drupal-cleanup-action@1.x
+        with:
+          ssh_user:             ${{ secrets.PROD_SSH_USER }}
+          ssh_host:             ${{ secrets.PROD_SSH_HOST }}
+          ssh_key:              ${{ secrets.PROD_SSH_KEY }}
+          cleanup_dir:          ${{ vars.PROD_ARTIFACTS_DIR }}
+          retain:               ${{ vars.RETAIN_RELEASES }}
+
+  #     - name: 'Discord notification'
+  #       run: >
+  #         curl -X POST -F "content=:white_check_mark: ${{ github.repository }} release **${{ github.ref_name }}** was
+  #         successfully deployed on [PROD](${{ vars.PROD_URL }}).
+  #         [view action run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+  #         ${{ secrets.DISCORD_WEBHOOK }}
+
+  # notify_failure:
+  #   name: 'Notify on failure'
+  #   runs-on:
+  #     labels: 'drupal-runner-v2'
+  #   needs: [create_release_archive, deploy_release, update_instance]
+  #   if: failure()
+  #   steps:
+  #     - name: 'Discord notification on failed deploy'
+  #       run: >
+  #         curl -X POST -F
+  #         "content=:octagonal_sign: **${{ github.repository }}** release **${{ github.ref_name }}** failed to deploy on [PROD](${{ vars.PROD_URL }}).
+  #         [view action run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+  #         ${{ secrets.DISCORD_WEBHOOK }}
