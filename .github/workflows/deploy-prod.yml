@@ -48,6 +48,8 @@ jobs:
         uses: eaudeweb/drupal-install-action@1.x
         with:
           dev: false
+          php: /usr/bin/php${{ vars.PROD_PHP_VERSION }}
+          
 
       - name: 'Create release archive'
         id: artifact
