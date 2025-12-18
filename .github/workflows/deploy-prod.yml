@@ -104,23 +104,23 @@ jobs:
           cleanup_dir:          ${{ vars.PROD_ARTIFACTS_DIR }}
           retain:               ${{ vars.RETAIN_RELEASES }}
 
-  #     - name: 'Discord notification'
-  #       run: >
-  #         curl -X POST -F "content=:white_check_mark: ${{ github.repository }} release **${{ github.ref_name }}** was
-  #         successfully deployed on [PROD](${{ vars.PROD_URL }}).
-  #         [view action run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-  #         ${{ secrets.DISCORD_WEBHOOK }}
+      - name: 'Discord notification'
+        run: >
+          curl -X POST -F "content=:white_check_mark: ${{ github.repository }} release **${{ github.ref_name }}** was
+          successfully deployed on [PROD](${{ vars.PROD_URL }}).
+          [view action run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          ${{ secrets.DISCORD_WEBHOOK }}
 
-  # notify_failure:
-  #   name: 'Notify on failure'
-  #   runs-on:
-  #     labels: 'drupal-runner-v2'
-  #   needs: [create_release_archive, deploy_release, update_instance]
-  #   if: failure()
-  #   steps:
-  #     - name: 'Discord notification on failed deploy'
-  #       run: >
-  #         curl -X POST -F
-  #         "content=:octagonal_sign: **${{ github.repository }}** release **${{ github.ref_name }}** failed to deploy on [PROD](${{ vars.PROD_URL }}).
-  #         [view action run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-  #         ${{ secrets.DISCORD_WEBHOOK }}
+  notify_failure:
+    name: 'Notify on failure'
+    runs-on:
+      labels: 'drupal-runner-v2'
+    needs: [create_release_archive, deploy_release, update_instance]
+    if: failure()
+    steps:
+      - name: 'Discord notification on failed deploy'
+        run: >
+          curl -X POST -F
+          "content=:octagonal_sign: **${{ github.repository }}** release **${{ github.ref_name }}** failed to deploy on [PROD](${{ vars.PROD_URL }}).
+          [view action run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          ${{ secrets.DISCORD_WEBHOOK }}
