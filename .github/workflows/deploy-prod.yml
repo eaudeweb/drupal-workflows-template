@@ -75,7 +75,7 @@ jobs:
           public_files_dir:   ${{ vars.PROD_PUBLIC_FILES_DIR }}
           robo_file:          ${{ vars.PROD_ROBO_FILE }}
           local_services_file: ${{ vars.PROD_LOCAL_SERVICES_FILE }}
-          database_dump_dir:  ${{ vars.PROD_DATABASE_DUMP_DIR }}
+          # database_dump_dir:  ${{ vars.PROD_DATABASE_DUMP_DIR }} # only if sync symlink is needed
           check_config:       ${{ inputs.check_config }}
           sql_backup:         ${{ inputs.sql_backup }}
           artifacts_lifespan: 30
