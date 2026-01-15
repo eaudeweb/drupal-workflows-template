@@ -9,10 +9,13 @@ jobs:
       labels: 'drupal-runner-v2'
     steps:
       - name: 'Dump SQL database'
-        uses: eaudeweb/drupal-sql-dump-action@1.x
+        uses: eaudeweb/drupal-sql-dump-action@2.x
         with:
-          ssh_user:             ${{ secrets.PROD_SSH_USER }}
-          ssh_host:             ${{ secrets.PROD_SSH_HOST }}
-          ssh_key:              ${{ secrets.PROD_SSH_KEY }}
-          project_dir:          ${{ vars.PROD_PROJECT_DIR }}
-          sql_dump_file:        ${{ vars.PROD_SQL_DUMP_DIR }}/database.sql
+          ssh_user:               ${{ secrets.PROD_SSH_USER }}
+          ssh_host:               ${{ secrets.PROD_SSH_HOST }}
+          ssh_key:                ${{ secrets.PROD_SSH_KEY }}
+          project_dir:            ${{ vars.PROD_PROJECT_DIR }}
+          sql_dump_file:          ${{ vars.PROD_DATABASE_DUMP_DIR }}/database.sql
+          nextcloud_user:         ${{ secrets.NEXTCLOUD_USER }}
+          nextcloud_app_password: ${{ secrets.NEXTCLOUD_APP_PASSWORD }}
+          nextcloud_path:         ${{ vars.NEXTCLOUD_PATH }}
