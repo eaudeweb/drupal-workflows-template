@@ -16,6 +16,7 @@ jobs:
           ssh_key:                ${{ secrets.PROD_SSH_KEY }}
           project_dir:            ${{ vars.PROD_PROJECT_DIR }}
           sql_dump_file:          ${{ vars.PROD_DATABASE_DUMP_DIR }}/database.sql
+          nextcloud_path:         ${{ vars.PROD_NEXTCLOUD_PATH }}
           nextcloud_user:         ${{ secrets.NEXTCLOUD_USER }}
           nextcloud_app_password: ${{ secrets.NEXTCLOUD_APP_PASSWORD }}
-          nextcloud_path:         ${{ vars.NEXTCLOUD_PATH }}
+
