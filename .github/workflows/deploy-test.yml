@@ -6,88 +6,48 @@ on:
 name: 'Deploy TEST instance'
 jobs:
   create_release_archive:
-    name: 'Create release archive'
-    runs-on:
-      labels: 'drupal-runner-v2'
-    outputs:
-      release_id: ${{ steps.artifact.outputs.base }}
-      release_filename: ${{ steps.artifact.outputs.filename }}
-    steps:
-      - name: 'Checkout source code'
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: 'Setup nodejs'
-        if: vars.ENABLE_NODEJS == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ${{ vars.NODE_VERSION_FILE }}
-
-      - name: 'Install dependencies'
-        uses: eaudeweb/drupal-install-action@1.x
-        with:
-          dev: false
-          php: /usr/bin/php${{ vars.TEST_PHP_VERSION }}
-
-      - name: 'Create release archive'
-        id: artifact
-        uses: eaudeweb/drupal-artifact-action@1.x
+    uses: ./.github/workflows/reusable-create-release-archive.yml
+    with:
+      runner: ${{ vars.RUNNER_LABEL }}
+      php_version: ${{ vars.TEST_PHP_VERSION }}
 
   deploy_release:
-    name: 'Deploy release on the server'
-    runs-on:
-      labels: 'drupal-runner-v2'
+    uses: ./.github/workflows/reusable-deploy-release.yml
     needs: create_release_archive
-    steps:
-      - name: 'Deploy release on the server'
-        uses: eaudeweb/drupal-deploy-action@2.x
-        with:
-          ssh_user:             ${{ secrets.TEST_SSH_USER }}
-          ssh_host:             ${{ secrets.TEST_SSH_HOST }}
-          ssh_key:              ${{ secrets.TEST_SSH_KEY }}
-          release_id:           ${{ needs.create_release_archive.outputs.release_id }}
-          release_filename:     ${{ needs.create_release_archive.outputs.release_filename }}
-          project_dir:          ${{ vars.TEST_PROJECT_DIR }}
-          artifacts_dir:        ${{ vars.TEST_ARTIFACTS_DIR }}
-          settings_file:        ${{ vars.TEST_SETTINGS_FILE }}
-          public_files_dir:     ${{ vars.TEST_PUBLIC_FILES_DIR }}
-          robo_file:            ${{ vars.TEST_ROBO_FILE }}
-          local_services_file:  ${{ vars.TEST_LOCAL_SERVICES_FILE }}
-          database_dump_dir:    ${{ vars.TEST_DATABASE_DUMP_DIR }} # only if sync symlink is needed
-          artifacts_lifespan:   30
+    with:
+      release_id:          ${{ needs.create_release_archive.outputs.release_id }}
+      release_filename:    ${{ needs.create_release_archive.outputs.release_filename }}
+      project_dir:         ${{ vars.TEST_PROJECT_DIR }}
+      artifacts_dir:       ${{ vars.TEST_ARTIFACTS_DIR }}
+      settings_file:       ${{ vars.TEST_SETTINGS_FILE }}
+      public_files_dir:    ${{ vars.TEST_PUBLIC_FILES_DIR }}
+      robo_file:           ${{ vars.TEST_ROBO_FILE }}
+      local_services_file: ${{ vars.TEST_LOCAL_SERVICES_FILE }}
+    secrets:
+      ssh_user: ${{ secrets.TEST_SSH_USER }}
+      ssh_host: ${{ secrets.TEST_SSH_HOST }}
+      ssh_key:  ${{ secrets.TEST_SSH_KEY }}
 
   update_instance:
-    name: 'Update Drupal instance'
-    runs-on:
-      labels: 'drupal-runner-v2'
+    uses: ./.github/workflows/reusable-update-instance.yml
     needs: deploy_release
-    steps:
-      - name: 'Update the Drupal instance'
-        id: release
-        uses: eaudeweb/drupal-update-action@1.x
-        with:
-          path: ${{ vars.TEST_PROJECT_DIR }}
-
-      - name: 'Cleanup old releases'
-        uses: eaudeweb/drupal-cleanup-action@1.x
-        with:
-          ssh_user:             ${{ secrets.TEST_SSH_USER }}
-          ssh_host:             ${{ secrets.TEST_SSH_HOST }}
-          ssh_key:              ${{ secrets.TEST_SSH_KEY }}
-          cleanup_dir:          ${{ vars.TEST_ARTIFACTS_DIR }}
-          retain:               ${{ vars.RETAIN_RELEASES }}
+    with:
+      project_dir:    ${{ vars.TEST_PROJECT_DIR }}
+      cleanup_dir:    ${{ vars.TEST_ARTIFACTS_DIR }}
+      retain:         ${{ vars.RETAIN_RELEASES }}
+      deployment_url: ${{ vars.TEST_URL }}
+      notify_success: false
+    secrets:
+      ssh_user:        ${{ secrets.TEST_SSH_USER }}
+      ssh_host:        ${{ secrets.TEST_SSH_HOST }}
+      ssh_key:         ${{ secrets.TEST_SSH_KEY }}
+      discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
 
   notify_failure:
-    name: 'Notify on failure'
-    runs-on:
-      labels: 'drupal-runner-v2'
+    uses: ./.github/workflows/reusable-notify-failure.yml
     needs: [create_release_archive, deploy_release, update_instance]
     if: failure()
-    steps:
-      - name: 'Discord notification on failed deploy'
-        run: >
-          curl -X POST -F
-          "content=:octagonal_sign: **${{ github.repository }}** release **${{ github.ref_name }}** failed to deploy on [TEST](${{ vars.TEST_URL }}).
-          [view action run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          ${{ secrets.DISCORD_WEBHOOK }}
+    with:
+      deployment_url: ${{ vars.TEST_URL }}
+    secrets:
+      discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
