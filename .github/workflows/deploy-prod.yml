@@ -20,7 +20,7 @@ on:
 name: 'Deploy PROD instance'
 jobs:
   create_release_archive:
-    uses: ./.github/workflows/reusable-create-release-archive.yml
+    uses: ./.github/workflows/reusable/lib.create-release-archive.yml
     with:
       # runner: ${{ vars.RUNNER_LABEL }}
       php_version: ${{ vars.PROD_PHP_VERSION }}
@@ -28,7 +28,7 @@ jobs:
       use_ref_as_release_id: true
 
   deploy_release:
-    uses: ./.github/workflows/reusable-deploy-release.yml
+    uses: ./.github/workflows/reusable/lib.deploy-release.yml
     needs: create_release_archive
     with:
       release_id:          ${{ needs.create_release_archive.outputs.release_id }}
@@ -47,7 +47,7 @@ jobs:
       ssh_key:  ${{ secrets.PROD_SSH_KEY }}
 
   update_instance:
-    uses: ./.github/workflows/reusable-update-instance.yml
+    uses: ./.github/workflows/reusable/lib.update-instance.yml
     needs: deploy_release
     with:
       project_dir:             ${{ vars.PROD_PROJECT_DIR }}
@@ -65,7 +65,7 @@ jobs:
       discord_webhook:    ${{ secrets.DISCORD_WEBHOOK }}
 
   notify_failure:
-    uses: ./.github/workflows/reusable-notify-failure.yml
+    uses: ./.github/workflows/reusable/lib.notify-failure.yml
     needs: [create_release_archive, deploy_release, update_instance]
     if: failure()
     with:
