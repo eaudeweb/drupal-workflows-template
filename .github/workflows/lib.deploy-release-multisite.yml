@@ -1,4 +1,3 @@
-# .github/workflows/lib.deploy-release-multisite.yml
 on:
   workflow_call:
     inputs:

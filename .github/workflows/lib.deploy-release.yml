@@ -1,4 +1,3 @@
-# .github/workflows/reusable-deploy-release.yml
 on:
   workflow_call:
     inputs:

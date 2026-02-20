@@ -1,4 +1,3 @@
-# .github/workflows/deploy-prod-multisite.yml
 on:
   workflow_dispatch:
     inputs:

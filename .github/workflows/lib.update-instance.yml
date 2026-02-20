@@ -1,4 +1,3 @@
-# .github/workflows/reusable-update-instance.yml
 on:
   workflow_call:
     inputs:
