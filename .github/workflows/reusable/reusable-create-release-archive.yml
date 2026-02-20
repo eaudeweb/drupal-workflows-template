@@ -26,8 +26,7 @@ on:
 jobs:
   create_release_archive:
     name: 'Create release archive'
-    runs-on:
-      labels: ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner }}
     outputs:
       release_filename: ${{ steps.artifact.outputs.filename }}
       release_id: ${{ steps.release_id.outputs.value }}

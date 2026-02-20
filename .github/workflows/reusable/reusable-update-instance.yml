@@ -44,8 +44,7 @@ on:
 jobs:
   update_instance:
     name: 'Update Drupal instance'
-    runs-on:
-      labels: ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner }}
     steps:
       - name: 'Update the Drupal instance'
         id: release

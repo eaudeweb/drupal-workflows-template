@@ -8,7 +8,7 @@ jobs:
   create_release_archive:
     uses: ./.github/workflows/reusable-create-release-archive.yml
     with:
-      runner: ${{ vars.RUNNER_LABEL }}
+      # runner: ${{ vars.RUNNER_LABEL }}
       php_version: ${{ vars.TEST_PHP_VERSION }}
 
   deploy_release:

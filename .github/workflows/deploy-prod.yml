@@ -22,7 +22,7 @@ jobs:
   create_release_archive:
     uses: ./.github/workflows/reusable-create-release-archive.yml
     with:
-      runner: ${{ vars.RUNNER_LABEL }}
+      # runner: ${{ vars.RUNNER_LABEL }}
       php_version: ${{ vars.PROD_PHP_VERSION }}
       checkout_ref: ${{ github.event.release.tag_name }}
       use_ref_as_release_id: true

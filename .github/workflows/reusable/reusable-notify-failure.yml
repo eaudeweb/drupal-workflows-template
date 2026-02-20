@@ -16,8 +16,7 @@ on:
 jobs:
   notify_failure:
     name: 'Notify on failure'
-    runs-on:
-      labels: ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner }}
     steps:
       - name: 'Discord notification on failed deploy'
         run: >
