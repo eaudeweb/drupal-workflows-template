@@ -8,8 +8,11 @@ jobs:
   create_release_archive:
     uses: ./.github/workflows/lib.create-release-archive.yml
     with:
-      # runner: ${{ vars.RUNNER_LABEL }}
-      php_version: ${{ vars.TEST_PHP_VERSION }}
+      # runner:              ${{ vars.RUNNER_LABEL }}
+      php_version:           ${{ vars.TEST_PHP_VERSION }}
+      enable_nodejs:         ${{ vars.ENABLE_NODEJS }}
+      node_version_file:     ${{ vars.NODE_VERSION_FILE }}
+      compile_theme_script:  ${{ vars.COMPILE_THEME_SCRIPT }}
 
   deploy_release:
     uses: ./.github/workflows/lib.deploy-release.yml

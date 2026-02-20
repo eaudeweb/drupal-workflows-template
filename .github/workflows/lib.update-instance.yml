@@ -27,11 +27,17 @@ on:
       deployment_url:
         type: string
         required: true
+      multisite:
+        type: boolean
+        required: false
+        default: false
     secrets:
       ssh_user:
         required: true
       ssh_host:
         required: true
+      ssh_host_app2:
+        required: false
       ssh_key:
         required: true
       statuscake_api_key:
@@ -60,6 +66,16 @@ jobs:
         with:
           ssh_user:    ${{ secrets.ssh_user }}
           ssh_host:    ${{ secrets.ssh_host }}
+          ssh_key:     ${{ secrets.ssh_key }}
+          cleanup_dir: ${{ inputs.cleanup_dir }}
+          retain:      ${{ inputs.retain }}
+
+      - name: 'Cleanup old releases on app2'
+        if: inputs.multisite
+        uses: eaudeweb/drupal-cleanup-action@1.x
+        with:
+          ssh_user:    ${{ secrets.ssh_user }}
+          ssh_host:    ${{ secrets.ssh_host_app2 }}
           ssh_key:     ${{ secrets.ssh_key }}
           cleanup_dir: ${{ inputs.cleanup_dir }}
           retain:      ${{ inputs.retain }}

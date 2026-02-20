@@ -17,6 +17,18 @@ on:
         type: boolean
         required: false
         default: false
+      enable_nodejs:
+        type: boolean
+        required: false
+        default: false
+      node_version_file:
+        type: string
+        required: false
+        default: ''
+      compile_theme_script:
+        type: string
+        required: false
+        default: ''
     outputs:
       release_filename:
         value: ${{ jobs.create_release_archive.outputs.release_filename }}
@@ -47,16 +59,20 @@ jobs:
           ref: ${{ inputs.checkout_ref }}
 
       - name: 'Setup nodejs'
-        if: vars.ENABLE_NODEJS == 'true'
+        if: inputs.enable_nodejs == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version-file: ${{ vars.NODE_VERSION_FILE }}
+          node-version-file: ${{ inputs.node_version_file }}
 
       - name: 'Install dependencies'
         uses: eaudeweb/drupal-install-action@1.x
         with:
           dev: false
           php: /usr/bin/php${{ inputs.php_version }}
+
+      - name: 'Compile theme'
+        if: inputs.compile_theme_script != ''
+        run: ./${{ inputs.compile_theme_script }}
 
       - name: 'Create release archive'
         id: artifact

@@ -1,3 +1,4 @@
+# .github/workflows/deploy-prod-multisite.yml
 on:
   workflow_dispatch:
     inputs:
@@ -5,7 +6,7 @@ on:
         type: boolean
         description: 'Fail when configuration overridden'
         required: true
-        default: false
+        default: true
       sql_backup:
         type: boolean
         description: 'Create SQL backup'
@@ -22,7 +23,6 @@ jobs:
   create_release_archive:
     uses: ./.github/workflows/lib.create-release-archive.yml
     with:
-      # runner:              ${{ vars.RUNNER_LABEL }}
       php_version:           ${{ vars.PROD_PHP_VERSION }}
       checkout_ref:          ${{ github.event.release.tag_name }}
       enable_nodejs:         ${{ vars.ENABLE_NODEJS }}
@@ -31,7 +31,7 @@ jobs:
       use_ref_as_release_id: true
 
   deploy_release:
-    uses: ./.github/workflows/lib.deploy-release.yml
+    uses: ./.github/workflows/lib.deploy-release-multisite.yml
     needs: create_release_archive
     with:
       release_id:          ${{ needs.create_release_archive.outputs.release_id }}
@@ -41,13 +41,13 @@ jobs:
       settings_file:       ${{ vars.PROD_SETTINGS_FILE }}
       public_files_dir:    ${{ vars.PROD_PUBLIC_FILES_DIR }}
       robo_file:           ${{ vars.PROD_ROBO_FILE }}
-      local_services_file: ${{ vars.PROD_LOCAL_SERVICES_FILE }}
       check_config:        ${{ inputs.check_config }}
       sql_backup:          ${{ inputs.sql_backup }}
     secrets:
-      ssh_user: ${{ secrets.PROD_SSH_USER }}
-      ssh_host: ${{ secrets.PROD_SSH_HOST }}
-      ssh_key:  ${{ secrets.PROD_SSH_KEY }}
+      ssh_user:       ${{ secrets.PROD_SSH_USER }}
+      ssh_host_app1:  ${{ secrets.PROD_SSH_HOST }}
+      ssh_host_app2:  ${{ secrets.PROD_SSH_HOST_APP2 }}
+      ssh_key:        ${{ secrets.PROD_SSH_KEY }}
 
   update_instance:
     uses: ./.github/workflows/lib.update-instance.yml
@@ -59,9 +59,11 @@ jobs:
       retain:                  ${{ vars.RETAIN_RELEASES }}
       deployment_url:          ${{ vars.PROD_URL }}
       notify_success:          true
+      multisiqte:              true
     secrets:
       ssh_user:           ${{ secrets.PROD_SSH_USER }}
       ssh_host:           ${{ secrets.PROD_SSH_HOST }}
+      ssh_host_app2:      ${{ secrets.PROD_SSH_HOST_APP2 }}
       ssh_key:            ${{ secrets.PROD_SSH_KEY }}
       statuscake_api_key: ${{ secrets.STATUSCAKE_API_KEY }}
       statuscake_test_id: ${{ secrets.PROD_STATUSCAKE_ID }}
