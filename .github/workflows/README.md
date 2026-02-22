@@ -9,7 +9,7 @@ Action used for synchronization: https://github.com/AndreasAugustin/actions-temp
 Workflows in this repository are automatically synchronized from the central template repository:  
 **[eaudeweb/drupal-workflows-template](https://github.com/eaudeweb/drupal-workflows-template)**
 
-- **Sync Frequency**: Daily at midnight UTC
+- **Sync Frequency**: Every Monday 5:00 AM UTC
 - **Sync Method**: Automatic pull requests
 - **Template Branch**: `main`
 
@@ -20,9 +20,11 @@ When the template repository is updated, a pull request will be automatically cr
 The template includes workflows for:
 
 - **Production Deployment** - Automated deployment to production environment
+- **Production Deployment (Multisite)** - Automated deployment to multiple production applications (used when 2 separate apps are deployed within the same project)
 - **Test Deployment** - Automated deployment to test environment  
 - **SQL Dump** - Database backup workflows for test/prod
 - **Database Sync** - Synchronization between environments
+- **Cleanup Git Tags** - Automated cleanup of old Git tags based on retention policy (keeps latest tags and removes tags older than a defined number of months)
 
 ## Project Configuration
 
@@ -46,9 +48,13 @@ Configure these in **Settings** → **Secrets and variables** → **Actions** �
 |-------------|-------------|---------|
 | `PROD_SSH_USER` | SSH username for deployments | web |
 | `PROD_SSH_HOST` | Host for production deployments | IP |
+| `PROD_SSH_HOST_APP2` | Host for production deployments (app2) - if necessary | IP |
 | `PROD_SSH_KEY` | SSH private key for production deployments | (private key content) |
 | `STATUSCAKE_API_KEY` | api key for connection to StatusCake |  |
 | `PROD_STATUSCAKE_ID` | id of the production website in StatusCake |  |
+| `DISCORD_WEBHOOK` | Discord webhook URL for notifications |  |
+| `NEXTCLOUD_USER` | Nextcloud username (for database upload/download to Eaudeweb Drive) |  |
+| `NEXTCLOUD_APP_PASSWORD` | Nextcloud app password (for database upload/download to Eaudeweb Drive) |  |
 
 #### Required Variables
 
@@ -56,13 +62,17 @@ Configure these in **Settings** → **Secrets and variables** → **Actions** �
 
 | Variable Name | Description | Example |
 |-------------|-------------|---------|
+| `RUNNER_LABEL` | Label of the runner to be used for deployment (if different than the default `drupal-runner-v2`) |  |
+| `PROD_PHP_VERSION` | PHP version to be used on the production server | 8.3 |
+| `ENABLE_NODEJS` | Boolean flag (`true`/`false`) that enables Node.js setup during the workflow execution. When set to `true`, the `actions/setup-node` step is executed. | `false` |
+| `NODE_VERSION_FILE` | Path to the file that defines the Node.js version (e.g. `.nvmrc`, `.node-version`) | `.nvmrc` |
+| `COMPILE_THEME_SCRIPT` | Path to the theme compilation script executed during the workflow (e.g. `scripts/compile-theme.sh`). If empty, the compile step is skipped. |  |
 | `PROD_PROJECT_DIR` | where the project is located on the production server | /var/www/html/example.org |
 | `PROD_ARTIFACTS_DIR` | where artifacts are stored on the production server | /var/www/artifacts/example.org |
 | `PROD_SETTINGS_FILE ` | where settings.local.php file is located on the production server | /var/www/config/example.org/settings.local.php |
 | `PROD_PUBLIC_FILES_DIR` | where public files are stored on the production server | /var/www/config/example.org/files |
 | `PROD_ROBO_FILE` | where the Robo file is located on the production server | /var/www/config/example.org/robo.yml |
 | `PROD_LOCAL_SERVICES_FILE` | if used, where the local services file is located on the production server | /var/www/config/example.org/services.local.yml |
-| `PROD_DATABASE_DUMP_DIR` | where database dumps are stored on the production server | /var/www/config/example.org/sync |
 | `RETAIN_RELEASES` | how many releases to retain on the production server | 5 |
 | `PROD_URL` | production website URL | https://example.org  |
 
@@ -80,6 +90,11 @@ Create a `.template-sync-ignore` file in `.github/workflows/`exclude specific wo
 # Ignore test-related workflows (if no test environment exists)
 .github/workflows/*test*.yml
 .github/workflows/deploy-test.yml
+# Ignore SQL dump and database sync workflows (if not needed)
+.github/workflows/sql-dump.yml
+.github/workflows/database-sync.yml
+# Ignore multisite production deployment workflow (if not needed)
+.github/workflows/deploy-prod-multisite.yml
 ```
 
 ## Handling Sync Pull Requests
