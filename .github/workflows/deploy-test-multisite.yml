@@ -1,0 +1,61 @@
+on:
+  push:
+    branches:
+      - 'test'
+
+name: 'Deploy TEST instance'
+jobs:
+  create_release_archive:
+    uses: ./.github/workflows/lib.create-release-archive.yml
+    with:
+      php_version:           ${{ vars.TEST_PHP_VERSION }}
+      enable_nodejs:         ${{ vars.ENABLE_NODEJS }}
+      node_version_file:     ${{ vars.NODE_VERSION_FILE }}
+      compile_theme_script:  ${{ vars.COMPILE_THEME_SCRIPT }}
+
+  deploy_release:
+    uses: ./.github/workflows/lib.deploy-release-multisite.yml
+    needs: create_release_archive
+    with:
+      release_id:          ${{ needs.create_release_archive.outputs.release_id }}
+      release_filename:    ${{ needs.create_release_archive.outputs.release_filename }}
+      project_dir:         ${{ vars.TEST_PROJECT_DIR }}
+      artifacts_dir:       ${{ vars.TEST_ARTIFACTS_DIR }}
+      settings_file:       ${{ vars.TEST_SETTINGS_FILE }}
+      public_files_dir:    ${{ vars.TEST_PUBLIC_FILES_DIR }}
+      robo_file:           ${{ vars.TEST_ROBO_FILE }}
+      check_config:        ${{ inputs.check_config }}
+      sql_backup:          ${{ inputs.sql_backup }}
+    secrets:
+      ssh_user:       ${{ secrets.TEST_SSH_USER }}
+      ssh_host_app1:  ${{ secrets.TEST_SSH_HOST }}
+      ssh_host_app2:  ${{ secrets.TEST_SSH_HOST_APP2 }}
+      ssh_key:        ${{ secrets.TEST_SSH_KEY }}
+
+  update_instance:
+    uses: ./.github/workflows/lib.update-instance.yml
+    needs: deploy_release
+    with:
+      project_dir:             ${{ vars.TEST_PROJECT_DIR }}
+      enable_maintenance_mode: ${{ inputs.enable_maintenance_mode }}
+      cleanup_dir:             ${{ vars.TEST_ARTIFACTS_DIR }}
+      retain:                  ${{ vars.RETAIN_RELEASES }}
+      deployment_url:          ${{ vars.TEST_URL }}
+      multisite:              true
+    secrets:
+      ssh_user:           ${{ secrets.TEST_SSH_USER }}
+      ssh_host:           ${{ secrets.TEST_SSH_HOST }}
+      ssh_host_app2:      ${{ secrets.TEST_SSH_HOST_APP2 }}
+      ssh_key:            ${{ secrets.TEST_SSH_KEY }}
+      statuscake_api_key: ${{ secrets.STATUSCAKE_API_KEY }}
+      statuscake_test_id: ${{ secrets.TEST_STATUSCAKE_ID }}
+      discord_webhook:    ${{ secrets.DISCORD_WEBHOOK }}
+
+  notify_failure:
+    uses: ./.github/workflows/lib.notify-failure.yml
+    needs: [create_release_archive, deploy_release, update_instance]
+    if: failure()
+    with:
+      deployment_url: ${{ vars.TEST_URL }}
+    secrets:
+      discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
