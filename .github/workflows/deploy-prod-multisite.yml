@@ -58,7 +58,7 @@ jobs:
       retain:                  ${{ vars.RETAIN_RELEASES }}
       deployment_url:          ${{ vars.PROD_URL }}
       notify_success:          true
-      multisiqte:              true
+      multisite:              true
     secrets:
       ssh_user:           ${{ secrets.PROD_SSH_USER }}
       ssh_host:           ${{ secrets.PROD_SSH_HOST }}
