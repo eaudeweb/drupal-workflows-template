@@ -101,6 +101,12 @@ Create a `.template-sync-ignore` file in `.github/workflows/`exclude specific wo
 
 When workflows are updated in the template, you'll receive an automated pull request with the changes, labeled with `template-sync`, `automated` and specific message.
 
+
+> **Important**
+>
+> - Existing workflow files will **not** be deleted through the template sync pull request.
+> - If a workflow file exists in your repository but its filename does not match any workflow file from the template, it will be ignored and will not be modified.
+
 ## Manual Sync Trigger
 
 If you need to sync workflows immediately (without waiting for the daily schedule):
