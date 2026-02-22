@@ -1,0 +1,56 @@
+on:
+  push:
+    branches:
+      - 'dev'
+
+name: 'Deploy DEV instance'
+jobs:
+  create_release_archive:
+    uses: ./.github/workflows/lib.create-release-archive.yml
+    with:
+      # runner:              ${{ vars.RUNNER_LABEL }}
+      php_version:           ${{ vars.DEV_PHP_VERSION }}
+      enable_nodejs:         ${{ vars.ENABLE_NODEJS }}
+      node_version_file:     ${{ vars.NODE_VERSION_FILE }}
+      compile_theme_script:  ${{ vars.COMPILE_THEME_SCRIPT }}
+
+  deploy_release:
+    uses: ./.github/workflows/lib.deploy-release.yml
+    needs: create_release_archive
+    with:
+      release_id:          ${{ needs.create_release_archive.outputs.release_id }}
+      release_filename:    ${{ needs.create_release_archive.outputs.release_filename }}
+      project_dir:         ${{ vars.DEV_PROJECT_DIR }}
+      artifacts_dir:       ${{ vars.DEV_ARTIFACTS_DIR }}
+      settings_file:       ${{ vars.DEV_SETTINGS_FILE }}
+      public_files_dir:    ${{ vars.DEV_PUBLIC_FILES_DIR }}
+      robo_file:           ${{ vars.DEV_ROBO_FILE }}
+      local_services_file: ${{ vars.DEV_LOCAL_SERVICES_FILE }}
+    secrets:
+      ssh_user: ${{ secrets.DEV_SSH_USER }}
+      ssh_host: ${{ secrets.DEV_SSH_HOST }}
+      ssh_key:  ${{ secrets.DEV_SSH_KEY }}
+
+  update_instance:
+    uses: ./.github/workflows/lib.update-instance.yml
+    needs: deploy_release
+    with:
+      project_dir:    ${{ vars.DEV_PROJECT_DIR }}
+      cleanup_dir:    ${{ vars.DEV_ARTIFACTS_DIR }}
+      retain:         ${{ vars.RETAIN_RELEASES }}
+      deployment_url: ${{ vars.DEV_URL }}
+      notify_success: false
+    secrets:
+      ssh_user:        ${{ secrets.DEV_SSH_USER }}
+      ssh_host:        ${{ secrets.DEV_SSH_HOST }}
+      ssh_key:         ${{ secrets.DEV_SSH_KEY }}
+      discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  notify_failure:
+    uses: ./.github/workflows/lib.notify-failure.yml
+    needs: [create_release_archive, deploy_release, update_instance]
+    if: failure()
+    with:
+      deployment_url: ${{ vars.DEV_URL }}
+    secrets:
+      discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
