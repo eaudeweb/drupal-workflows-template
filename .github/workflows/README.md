@@ -31,7 +31,7 @@ This template includes the following workflows:
 To enable automatic workflow synchronization, you need to configure one secret:
 
 | Secret Name           | Description                                 | How to obtain                |
-|-----------------------|------------------------------- -------------|------------------------------|
+|-----------------------|---------------------------------------------|------------------------------|
 | `TEMPLATE_SYNC_TOKEN` | Personal Access Token for syncing workflows | Ask someone from DevOps Team |
 
 ### Workflow Configuration
