@@ -59,12 +59,9 @@ Configure these in **Settings** → **Secrets and variables** → **Actions** �
 Configure these in **Settings** → **Secrets and variables** → **Actions** → **Variables**:
 
 | Variable Name | Description | Example |
-|----------------------------|------------------------------------------------------------------------------|---------|
+|----------------------------|--------------------------------------------------------------------------------------------------------|----------------------|
 | `PROD_URL`                 | Production website URL                                                                                 | https://example.org  |
 | `PROD_PHP_VERSION`         | PHP version to be used on the production server                                                        | `8.3` |
-| `ENABLE_NODEJS`            | Flag to enable Node.js setup during workflow execution. When `true`, `actions/setup-node` is executed. |  `true`/`false` |
-| `NODE_VERSION_FILE`        | Disk path to the Node.js version (e.g. `.nvmrc`, `.node-version`)                                      | `.nvmrc` |
-| `COMPILE_THEME_SCRIPT`     | Disk path to the theme compilation script executed during the deployments (e.g. `scripts/compile-theme.sh`). If empty, the compile step is skipped. |  |
 | `PROD_PROJECT_DIR`         | Disk path to the website symlink on the production server                                              | `/var/www/html/example.org` |
 | `PROD_ARTIFACTS_DIR`       | Disk path to the artifacts directory (where actual release artifacts) on the production server         | /var/www/artifacts/example.org |
 | `PROD_SETTINGS_FILE `      | Disk path to the `settings.local.php` on the production server                                         | `/var/www/config/example.org/settings.local.php` |
@@ -73,6 +70,9 @@ Configure these in **Settings** → **Secrets and variables** → **Actions** �
 | `PROD_LOCAL_SERVICES_FILE` | (Optional) Disk path to the local services file on the production server                               | `/var/www/config/example.org/services.local.yml` |
 | `RETAIN_RELEASES`          | (Optional) Number of releases to retain on the production server                                       | 5 |
 | `RUNNER_LABEL`             | (Optional) Label of the runner to be used for deployment                                               | `drupal-runner-v2` |
+| `ENABLE_NODEJS`            | (Optional) Flag to enable Node.js setup during workflow execution. When `true`, `actions/setup-node` is executed. |  `true`/`false` |
+| `NODE_VERSION_FILE`        | (Optional) Disk path to the Node.js version (e.g. `.nvmrc`, `.node-version`)                                      | `.nvmrc` |
+| `COMPILE_THEME_SCRIPT`     | (Optional) Disk path to the theme compilation script executed during the deployments - [see](https://github.com/eaudeweb/iucn.org/blob/main/.github/workflows/deploy-dev.yml#L31). If empty, the compile step is skipped. | `scripts/compile-theme.sh` |
 
 > **Important**: Same variables and secrets are needed for the test environment workflows, prefixed with `TEST_` instead of `PROD_`.
 
