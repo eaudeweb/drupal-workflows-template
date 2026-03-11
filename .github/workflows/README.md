@@ -76,6 +76,8 @@ Configure these in **Settings** → **Secrets and variables** → **Actions** �
 
 > **Important**: Same variables and secrets are needed for the test environment workflows, prefixed with `TEST_` instead of `PROD_`.
 
+> **Note**: Each job supports the `RUNNER_LABEL` variable (`${{ vars.RUNNER_LABEL }}`) to override the default runner. If not set, the default runner label `drupal-runner-v2` is used.
+
 ## Customizing Workflow Synchronization
 
 Some workflows are optional, if your don't have a test environment, don't create the test* deployment workflows. Create a `.template-sync-ignore` file in `.github/workflows/` to exclude specific workflows from being synced, for instance:
