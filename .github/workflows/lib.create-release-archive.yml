@@ -17,9 +17,9 @@ on:
         required: false
         default: false
       enable_nodejs:
-        type: boolean
+        type: string
         required: false
-        default: false
+        default: ''
       node_version_file:
         type: string
         required: false

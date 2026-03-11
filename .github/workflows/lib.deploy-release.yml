@@ -31,13 +31,13 @@ on:
         required: false
         default: ''
       check_config:
-        type: boolean
+        type: string
         required: false
-        default: false
+        default: ''
       sql_backup:
-        type: boolean
+        type: string
         required: false
-        default: true
+        default: 'true'
       artifacts_lifespan:
         type: number
         required: false

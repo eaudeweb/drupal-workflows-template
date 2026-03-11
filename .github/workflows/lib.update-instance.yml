@@ -9,9 +9,9 @@ on:
         type: string
         required: true
       enable_maintenance_mode:
-        type: boolean
+        type: string
         required: false
-        default: true
+        default: 'true'
       cleanup_dir:
         type: string
         required: true
