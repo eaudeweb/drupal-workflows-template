@@ -13,9 +13,28 @@ jobs:
       node_version_file:     ${{ vars.NODE_VERSION_FILE }}
       compile_theme_script:  ${{ vars.COMPILE_THEME_SCRIPT }}
 
-  deploy_release:
-    uses: ./.github/workflows/lib.deploy-release-multisite.yml
+  deploy_release_app2:
+    uses: ./.github/workflows/lib.deploy-release.yml
     needs: create_release_archive
+    with:
+      release_id:              ${{ needs.create_release_archive.outputs.release_id }}
+      release_filename:        ${{ needs.create_release_archive.outputs.release_filename }}
+      project_dir:             ${{ vars.DEV_PROJECT_DIR }}
+      artifacts_dir:           ${{ vars.DEV_ARTIFACTS_DIR }}
+      settings_file:           ${{ vars.DEV_SETTINGS_FILE }}
+      public_files_dir:        ${{ vars.DEV_PUBLIC_FILES_DIR }}
+      robo_file:               ${{ vars.DEV_ROBO_FILE }}
+      check_config:            ${{ inputs.check_config }}
+      sql_backup:              ${{ inputs.sql_backup }}
+      delete_release_filename: false
+    secrets:
+      ssh_user: ${{ secrets.DEV_SSH_USER }}
+      ssh_host: ${{ secrets.DEV_SSH_HOST_APP2 }}
+      ssh_key:  ${{ secrets.DEV_SSH_KEY }}
+
+  deploy_release_app1:
+    uses: ./.github/workflows/lib.deploy-release.yml
+    needs: [create_release_archive, deploy_release_app2]
     with:
       release_id:          ${{ needs.create_release_archive.outputs.release_id }}
       release_filename:    ${{ needs.create_release_archive.outputs.release_filename }}
@@ -27,14 +46,13 @@ jobs:
       check_config:        ${{ inputs.check_config }}
       sql_backup:          ${{ inputs.sql_backup }}
     secrets:
-      ssh_user:       ${{ secrets.DEV_SSH_USER }}
-      ssh_host_app1:  ${{ secrets.DEV_SSH_HOST }}
-      ssh_host_app2:  ${{ secrets.DEV_SSH_HOST_APP2 }}
-      ssh_key:        ${{ secrets.DEV_SSH_KEY }}
+      ssh_user: ${{ secrets.DEV_SSH_USER }}
+      ssh_host: ${{ secrets.DEV_SSH_HOST }}
+      ssh_key:  ${{ secrets.DEV_SSH_KEY }}
 
   update_instance:
     uses: ./.github/workflows/lib.update-instance.yml
-    needs: deploy_release
+    needs: deploy_release_app1
     with:
       project_dir:             ${{ vars.DEV_PROJECT_DIR }}
       enable_maintenance_mode: ${{ inputs.enable_maintenance_mode }}
@@ -53,7 +71,7 @@ jobs:
 
   notify_failure:
     uses: ./.github/workflows/lib.notify-failure.yml
-    needs: [create_release_archive, deploy_release, update_instance]
+    needs: [create_release_archive, deploy_release_app2, deploy_release_app1, update_instance]
     if: failure()
     with:
       deployment_url: ${{ vars.DEV_URL }}

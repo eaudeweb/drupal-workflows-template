@@ -2,8 +2,8 @@ name: Cleanup Git Tags
 
 on:
   # cronjob trigger
-  # schedule:
-  # - cron: "0 6 * * 1"  # Every Monday 6:00 AM UTC
+  schedule:
+  - cron: "0 6 * * 1"  # Every Monday 6:00 AM UTC
   # manual trigger
   workflow_dispatch:
 

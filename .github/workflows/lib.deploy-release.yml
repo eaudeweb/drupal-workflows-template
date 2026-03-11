@@ -28,7 +28,8 @@ on:
         required: true
       local_services_file:
         type: string
-        required: true
+        required: false
+        default: ''
       check_config:
         type: boolean
         required: false
@@ -41,6 +42,10 @@ on:
         type: number
         required: false
         default: 30
+      delete_release_filename:
+        type: boolean
+        required: false
+        default: true
     secrets:
       ssh_user:
         required: true
@@ -57,17 +62,18 @@ jobs:
       - name: 'Deploy release on the server'
         uses: eaudeweb/drupal-deploy-action@2.x
         with:
-          ssh_user:            ${{ secrets.ssh_user }}
-          ssh_host:            ${{ secrets.ssh_host }}
-          ssh_key:             ${{ secrets.ssh_key }}
-          release_id:          ${{ inputs.release_id }}
-          release_filename:    ${{ inputs.release_filename }}
-          project_dir:         ${{ inputs.project_dir }}
-          artifacts_dir:       ${{ inputs.artifacts_dir }}
-          settings_file:       ${{ inputs.settings_file }}
-          public_files_dir:    ${{ inputs.public_files_dir }}
-          robo_file:           ${{ inputs.robo_file }}
-          local_services_file: ${{ inputs.local_services_file }}
-          check_config:        ${{ inputs.check_config }}
-          sql_backup:          ${{ inputs.sql_backup }}
-          artifacts_lifespan:  ${{ inputs.artifacts_lifespan }}
+          ssh_user:                ${{ secrets.ssh_user }}
+          ssh_host:                ${{ secrets.ssh_host }}
+          ssh_key:                 ${{ secrets.ssh_key }}
+          release_id:              ${{ inputs.release_id }}
+          release_filename:        ${{ inputs.release_filename }}
+          project_dir:             ${{ inputs.project_dir }}
+          artifacts_dir:           ${{ inputs.artifacts_dir }}
+          settings_file:           ${{ inputs.settings_file }}
+          public_files_dir:        ${{ inputs.public_files_dir }}
+          robo_file:               ${{ inputs.robo_file }}
+          local_services_file:     ${{ inputs.local_services_file }}
+          check_config:            ${{ inputs.check_config }}
+          sql_backup:              ${{ inputs.sql_backup }}
+          artifacts_lifespan:      ${{ inputs.artifacts_lifespan }}
+          delete_release_filename: ${{ inputs.delete_release_filename }}

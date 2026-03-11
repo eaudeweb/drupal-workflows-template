@@ -2,8 +2,8 @@ name: Sync workflows from template
 
 on:
   # cronjob trigger
-  # schedule:
-  # - cron: "0 5 * * 1"  # Every Monday 5:00 AM UTC
+  schedule:
+  - cron: "0 5 * * 1"  # Every Monday 5:00 AM UTC
   # manual trigger
   workflow_dispatch:
 jobs:
@@ -22,7 +22,7 @@ jobs:
           token: ${{ secrets.TEMPLATE_SYNC_TOKEN }}
       
       - name: actions-template-sync
-        uses: AndreasAugustin/actions-template-sync@v2
+        uses: AndreasAugustin/actions-template-sync@8ec19a5f2721ffb81ff809aa340ddf75e6a85ea6 # v2.5.2
         with:
           source_gh_token: ${{ secrets.TEMPLATE_SYNC_TOKEN }}
           source_repo_path: eaudeweb/drupal-workflows-template
