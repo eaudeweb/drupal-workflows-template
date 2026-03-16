@@ -21,3 +21,5 @@ jobs:
         with:
           keep: 50
           months: 6
+          apply: true
+          
