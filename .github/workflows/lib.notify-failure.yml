@@ -21,6 +21,6 @@ jobs:
         run: >
           curl -X POST -F
           "content=:octagonal_sign: **${{ github.repository }}** release **${{ github.ref_name }}** failed to deploy on
-          [${{ inputs.deployment_url }}](${{ inputs.deployment_url }}).
+          <${{ inputs.deployment_url }}>.
           [view action run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           ${{ secrets.discord_webhook }}
