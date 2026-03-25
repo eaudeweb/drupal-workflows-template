@@ -1,3 +1,5 @@
+# DO NOT EDIT - This file is managed by the template repository.
+# Source: https://github.com/eaudeweb/drupal-workflows-template
 # GITLEAKS_LICENSE - Get a free license from https://gitleaks.io/
 name: Gitleaks scan
 

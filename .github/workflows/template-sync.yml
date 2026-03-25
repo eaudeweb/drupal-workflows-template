@@ -1,3 +1,5 @@
+# DO NOT EDIT - This file is managed by the template repository.
+# Source: https://github.com/eaudeweb/drupal-workflows-template
 name: Sync workflows from template
 
 on:
@@ -38,7 +40,7 @@ jobs:
           pr_labels: |
             template-sync
             automated
-          pr_title: "Sync workflows from template"
+          pr_title: "[DevOps] Sync workflows from template"
           pr_body: |
             Automated sync from template repository.
             Please review changes before merging.
