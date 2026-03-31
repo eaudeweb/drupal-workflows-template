@@ -7,7 +7,7 @@ on:
         type: boolean
         description: 'Fail when configuration overridden'
         required: true
-        default: false
+        default: true
       sql_backup:
         type: boolean
         description: 'Create SQL backup'
