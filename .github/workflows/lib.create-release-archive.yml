@@ -54,14 +54,14 @@ jobs:
           exit 1
 
       - name: 'Checkout source code'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           ref: ${{ inputs.checkout_ref }}
 
       - name: 'Setup nodejs'
         if: inputs.enable_nodejs == 'true'
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version-file: ${{ inputs.node_version_file }}
 
