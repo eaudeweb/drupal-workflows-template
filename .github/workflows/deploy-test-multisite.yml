@@ -67,8 +67,6 @@ jobs:
       ssh_host:           ${{ secrets.TEST_SSH_HOST }}
       ssh_host_app2:      ${{ secrets.TEST_SSH_HOST_APP2 }}
       ssh_key:            ${{ secrets.TEST_SSH_KEY }}
-      statuscake_api_key: ${{ secrets.STATUSCAKE_API_KEY }}
-      statuscake_test_id: ${{ secrets.TEST_STATUSCAKE_ID }}
       discord_webhook:    ${{ secrets.DISCORD_WEBHOOK }}
 
   notify_failure:
