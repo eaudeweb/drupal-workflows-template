@@ -61,7 +61,7 @@ jobs:
 
       - name: 'Setup nodejs'
         if: inputs.enable_nodejs == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: ${{ inputs.node_version_file }}
 
