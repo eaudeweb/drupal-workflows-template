@@ -61,7 +61,8 @@ jobs:
       cleanup_dir:             ${{ vars.TEST_ARTIFACTS_DIR }}
       retain:                  ${{ vars.RETAIN_RELEASES }}
       deployment_url:          ${{ vars.TEST_URL }}
-      multisite:              true
+      multisite:               true
+      enable_extra_modules:    ${{ vars.TEST_ENABLE_EXTRA_MODULES }}
     secrets:
       ssh_user:           ${{ secrets.TEST_SSH_USER }}
       ssh_host:           ${{ secrets.TEST_SSH_HOST }}

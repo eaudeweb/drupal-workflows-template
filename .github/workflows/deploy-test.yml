@@ -36,11 +36,12 @@ jobs:
     uses: ./.github/workflows/lib.update-instance.yml
     needs: deploy_release
     with:
-      project_dir:    ${{ vars.TEST_PROJECT_DIR }}
-      cleanup_dir:    ${{ vars.TEST_ARTIFACTS_DIR }}
-      retain:         ${{ vars.RETAIN_RELEASES }}
-      deployment_url: ${{ vars.TEST_URL }}
-      notify_success: false
+      project_dir:          ${{ vars.TEST_PROJECT_DIR }}
+      cleanup_dir:          ${{ vars.TEST_ARTIFACTS_DIR }}
+      retain:               ${{ vars.RETAIN_RELEASES }}
+      deployment_url:       ${{ vars.TEST_URL }}
+      notify_success:       false
+      enable_extra_modules: ${{ vars.TEST_ENABLE_EXTRA_MODULES }}
     secrets:
       ssh_user:        ${{ secrets.TEST_SSH_USER }}
       ssh_host:        ${{ secrets.TEST_SSH_HOST }}

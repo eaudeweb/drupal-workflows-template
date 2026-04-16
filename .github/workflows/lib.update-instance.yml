@@ -32,6 +32,10 @@ on:
         type: boolean
         required: false
         default: false
+      enable_extra_modules:
+        type: string
+        required: false
+        default: ''
     secrets:
       ssh_user:
         required: true
@@ -59,6 +63,7 @@ jobs:
         with:
           path:                    ${{ inputs.project_dir }}
           enable_maintenance_mode: ${{ inputs.enable_maintenance_mode }}
+          enable_extra_modules:    ${{ inputs.enable_extra_modules }}
           statuscake_api_key:      ${{ secrets.statuscake_api_key }}
           statuscake_test_id:      ${{ secrets.statuscake_test_id }}
 

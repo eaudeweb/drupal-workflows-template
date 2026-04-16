@@ -60,6 +60,7 @@ jobs:
       retain:                  ${{ vars.RETAIN_RELEASES }}
       deployment_url:          ${{ vars.PROD_URL }}
       notify_success:          true
+      enable_extra_modules:    ${{ vars.PROD_ENABLE_EXTRA_MODULES }}
     secrets:
       ssh_user:           ${{ secrets.PROD_SSH_USER }}
       ssh_host:           ${{ secrets.PROD_SSH_HOST }}
