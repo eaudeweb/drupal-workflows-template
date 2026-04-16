@@ -3,16 +3,35 @@
 on:
   workflow_dispatch:
     inputs:
-      sync_db:
-        description: 'Synchronize DB'
+      dump_prod_db:
+        description: 'Dump PROD SQL database before sync'
         type: boolean
         required: true
-        default: true
+        default: false
 
 name: 'Sync PRODUCTION to TEST'
 jobs:
+  dump_prod:
+    name: 'Dump PROD SQL database'
+    if: ${{ inputs.dump_prod_db }}
+    runs-on:
+      labels: 'drupal-runner-v2'
+    steps:
+      - name: 'Dump SQL database'
+        uses: eaudeweb/drupal-sql-dump-action@2.x
+        with:
+          ssh_user:               ${{ secrets.PROD_SSH_USER }}
+          ssh_host:               ${{ secrets.PROD_SSH_HOST }}
+          ssh_key:                ${{ secrets.PROD_SSH_KEY }}
+          project_dir:            ${{ vars.PROD_PROJECT_DIR }}
+          sql_dump_file:          ${{ vars.PROD_DATABASE_DUMP_DIR }}/database.sql
+          nextcloud_path:         ${{ vars.PROD_NEXTCLOUD_PATH }}
+          nextcloud_user:         ${{ secrets.NEXTCLOUD_USER }}
+          nextcloud_app_password: ${{ secrets.NEXTCLOUD_APP_PASSWORD }}
   db:
     name: 'Executing synchronization'
+    needs: dump_prod
+    if: ${{ always() }}
     runs-on:
       labels: 'drupal-runner-v2'
     steps:
@@ -23,7 +42,6 @@ jobs:
           target_ssh_host:             ${{ secrets.TEST_SSH_HOST }}
           target_ssh_key:              ${{ secrets.TEST_SSH_KEY }}
           target_project_dir:          ${{ vars.TEST_PROJECT_DIR }}
-          sync_db:                     ${{ inputs.sync_db }}
           nextcloud_path:              ${{ vars.PROD_NEXTCLOUD_PATH }}
           nextcloud_user:              ${{ secrets.NEXTCLOUD_USER }}
           nextcloud_app_password:      ${{ secrets.NEXTCLOUD_APP_PASSWORD }}
