@@ -10,6 +10,7 @@ jobs:
   create_release_archive:
     uses: ./.github/workflows/lib.create-release-archive.yml
     with:
+      runner:                ${{ vars.TEST_RUNNER }}
       php_version:           ${{ vars.TEST_PHP_VERSION }}
       enable_nodejs:         ${{ vars.ENABLE_NODEJS }}
       node_version_file:     ${{ vars.NODE_VERSION_FILE }}
@@ -19,6 +20,7 @@ jobs:
     uses: ./.github/workflows/lib.deploy-release.yml
     needs: create_release_archive
     with:
+      runner:                  ${{ vars.TEST_RUNNER }}
       release_id:              ${{ needs.create_release_archive.outputs.release_id }}
       release_filename:        ${{ needs.create_release_archive.outputs.release_filename }}
       project_dir:             ${{ vars.TEST_PROJECT_DIR }}
@@ -38,6 +40,7 @@ jobs:
     uses: ./.github/workflows/lib.deploy-release.yml
     needs: [create_release_archive, deploy_release_app2]
     with:
+      runner:              ${{ vars.TEST_RUNNER }}
       release_id:          ${{ needs.create_release_archive.outputs.release_id }}
       release_filename:    ${{ needs.create_release_archive.outputs.release_filename }}
       project_dir:         ${{ vars.TEST_PROJECT_DIR }}
@@ -56,6 +59,7 @@ jobs:
     uses: ./.github/workflows/lib.update-instance.yml
     needs: deploy_release_app1
     with:
+      runner:                  ${{ vars.TEST_RUNNER }}
       project_dir:             ${{ vars.TEST_PROJECT_DIR }}
       enable_maintenance_mode: ${{ inputs.enable_maintenance_mode }}
       cleanup_dir:             ${{ vars.TEST_ARTIFACTS_DIR }}
@@ -75,6 +79,7 @@ jobs:
     needs: [create_release_archive, deploy_release_app2, deploy_release_app1, update_instance]
     if: failure()
     with:
+      runner:         ${{ vars.TEST_RUNNER }}
       deployment_url: ${{ vars.TEST_URL }}
     secrets:
       discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}

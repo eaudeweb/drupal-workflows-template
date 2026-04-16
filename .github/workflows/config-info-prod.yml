@@ -7,8 +7,7 @@ name: 'Check PROD config management'
 jobs:
   deploy:
     name: 'Show Drupal config status'
-    runs-on:
-      labels: 'drupal-runner-v2'
+    runs-on: ${{ vars.PROD_RUNNER || 'drupal-runner-v2' }}
     steps:
       - name: 'Check Drupal configuration'
         uses: eaudeweb/drupal-config-status-action@1.x

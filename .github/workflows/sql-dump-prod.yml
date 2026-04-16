@@ -7,8 +7,7 @@ name: 'Dump PROD SQL database'
 jobs:
   deploy:
     name: 'Dump SQL database'
-    runs-on:
-      labels: 'drupal-runner-v2'
+    runs-on: ${{ vars.PROD_RUNNER || 'drupal-runner-v2' }}
     steps:
       - name: 'Dump SQL database'
         uses: eaudeweb/drupal-sql-dump-action@2.x

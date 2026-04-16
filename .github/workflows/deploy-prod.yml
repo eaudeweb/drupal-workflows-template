@@ -24,6 +24,7 @@ jobs:
   create_release_archive:
     uses: ./.github/workflows/lib.create-release-archive.yml
     with:
+      runner:                ${{ vars.PROD_RUNNER }}
       php_version:           ${{ vars.PROD_PHP_VERSION }}
       checkout_ref:          ${{ github.event.release.tag_name }}
       enable_nodejs:         ${{ vars.ENABLE_NODEJS }}
@@ -35,6 +36,7 @@ jobs:
     uses: ./.github/workflows/lib.deploy-release.yml
     needs: create_release_archive
     with:
+      runner:              ${{ vars.PROD_RUNNER }}
       release_id:          ${{ needs.create_release_archive.outputs.release_id }}
       release_filename:    ${{ needs.create_release_archive.outputs.release_filename }}
       project_dir:         ${{ vars.PROD_PROJECT_DIR }}
@@ -54,6 +56,7 @@ jobs:
     uses: ./.github/workflows/lib.update-instance.yml
     needs: deploy_release
     with:
+      runner:                  ${{ vars.PROD_RUNNER }}
       project_dir:             ${{ vars.PROD_PROJECT_DIR }}
       enable_maintenance_mode: ${{ inputs.enable_maintenance_mode }}
       cleanup_dir:             ${{ vars.PROD_ARTIFACTS_DIR }}
@@ -74,6 +77,7 @@ jobs:
     needs: [create_release_archive, deploy_release, update_instance]
     if: failure()
     with:
+      runner:         ${{ vars.PROD_RUNNER }}
       deployment_url: ${{ vars.PROD_URL }}
     secrets:
       discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}

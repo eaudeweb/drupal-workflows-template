@@ -39,7 +39,7 @@ on:
 jobs:
   create_release_archive:
     name: 'Create release archive'
-    runs-on: ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner || 'drupal-runner-v2' }}
     outputs:
       release_filename: ${{ steps.artifact.outputs.filename }}
       release_id: ${{ steps.release_id.outputs.value }}

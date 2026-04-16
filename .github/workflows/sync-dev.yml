@@ -14,8 +14,7 @@ jobs:
   dump_prod:
     name: 'Dump PROD SQL database'
     if: ${{ inputs.dump_prod_db }}
-    runs-on:
-      labels: 'drupal-runner-v2'
+    runs-on: ${{ vars.PROD_RUNNER || 'drupal-runner-v2' }}
     steps:
       - name: 'Dump SQL database'
         uses: eaudeweb/drupal-sql-dump-action@2.x
@@ -32,8 +31,7 @@ jobs:
     name: 'Executing synchronization'
     needs: dump_prod
     if: ${{ always() }}
-    runs-on:
-      labels: 'drupal-runner-v2'
+    runs-on: ${{ vars.DEV_RUNNER || 'drupal-runner-v2' }}
     steps:
       - name: 'Running'
         uses: eaudeweb/drupal-sync-action@2.x

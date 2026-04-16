@@ -17,7 +17,7 @@ on:
 jobs:
   notify_failure:
     name: 'Notify on failure'
-    runs-on: ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner || 'drupal-runner-v2' }}
     steps:
       - name: 'Discord notification on failed deploy'
         run: >

@@ -59,7 +59,7 @@ on:
 jobs:
   deploy_release:
     name: 'Deploy release on the server'
-    runs-on: ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner || 'drupal-runner-v2' }}
     steps:
       - name: 'Deploy release on the server'
         uses: eaudeweb/drupal-deploy-action@2.x
