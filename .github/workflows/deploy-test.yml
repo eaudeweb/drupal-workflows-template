@@ -15,7 +15,7 @@ jobs:
       enable_nodejs:         ${{ vars.ENABLE_NODEJS }}
       node_version_file:     ${{ vars.NODE_VERSION_FILE }}
       compile_theme_script:  ${{ vars.COMPILE_THEME_SCRIPT }}
-      install_dev:           ${{ vars.TEST_INSTALL_DEV || false }}
+      install_dev:           ${{ vars.TEST_INSTALL_DEV }}
 
   deploy_release:
     uses: ./.github/workflows/lib.deploy-release.yml

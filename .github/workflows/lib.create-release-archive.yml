@@ -31,9 +31,9 @@ on:
         required: false
         default: ''
       install_dev:
-        type: boolean
+        type: string
         required: false
-        default: false
+        default: 'false'
     outputs:
       release_filename:
         value: ${{ jobs.create_release_archive.outputs.release_filename }}
@@ -72,7 +72,7 @@ jobs:
       - name: 'Install dependencies'
         uses: eaudeweb/drupal-install-action@1.x
         with:
-          dev: ${{ inputs.install_dev }}
+          dev: ${{ inputs.install_dev || 'false' }}
           php: /usr/bin/php${{ inputs.php_version }}
 
       - name: 'Compile theme'
