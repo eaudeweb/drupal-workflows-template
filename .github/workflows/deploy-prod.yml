@@ -30,6 +30,7 @@ jobs:
       enable_nodejs:         ${{ vars.ENABLE_NODEJS }}
       node_version_file:     ${{ vars.NODE_VERSION_FILE }}
       compile_theme_script:  ${{ vars.COMPILE_THEME_SCRIPT }}
+      install_dev:           ${{ vars.PROD_INSTALL_DEV }}
       use_ref_as_release_id: true
 
   deploy_release:
