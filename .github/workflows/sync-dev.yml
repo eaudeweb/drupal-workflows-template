@@ -3,8 +3,18 @@
 on:
   workflow_dispatch:
     inputs:
+      sync_prod_db:
+        description: 'Sync database from PROD to DEV'
+        type: boolean
+        required: true
+        default: false
       dump_prod_db:
         description: 'Dump PROD SQL database before sync'
+        type: boolean
+        required: true
+        default: false
+      sync_prod_files:
+        description: 'Sync public files from PROD to DEV'
         type: boolean
         required: true
         default: false
@@ -13,7 +23,7 @@ name: 'Sync PRODUCTION to DEV'
 jobs:
   dump_prod:
     name: 'Dump PROD SQL database'
-    if: ${{ inputs.dump_prod_db }}
+    if: ${{ inputs.dump_prod_db && inputs.sync_prod_db }}
     runs-on: ${{ vars.PROD_RUNNER || 'drupal-runner-v2' }}
     steps:
       - name: 'Dump SQL database'
@@ -30,7 +40,7 @@ jobs:
   db:
     name: 'Executing synchronization'
     needs: dump_prod
-    if: ${{ always() }}
+    if: ${{ always() && inputs.sync_prod_db }}
     runs-on: ${{ vars.DEV_RUNNER || 'drupal-runner-v2' }}
     steps:
       - name: 'Running'
@@ -43,3 +53,19 @@ jobs:
           nextcloud_path:              ${{ vars.PROD_NEXTCLOUD_PATH }}
           nextcloud_user:              ${{ secrets.NEXTCLOUD_USER }}
           nextcloud_app_password:      ${{ secrets.NEXTCLOUD_APP_PASSWORD }}
+  sync_files:
+    name: 'Sync public files'
+    needs: db
+    if: ${{ always() && inputs.sync_prod_files }}
+    runs-on: ${{ vars.DEV_RUNNER || 'drupal-runner-v2' }}
+    steps:
+      - uses: eaudeweb/drupal-files-sync-action@1.x
+        with:
+          source_files_dir: ${{ vars.PROD_PUBLIC_FILES_DIR }}
+          target_files_dir: ${{ vars.DEV_PUBLIC_FILES_DIR }}
+          prod_ssh_key:     ${{ secrets.PROD_SSH_KEY }}
+          prod_ssh_host:    ${{ secrets.PROD_SSH_HOST }}
+          prod_ssh_user:    ${{ secrets.PROD_SSH_USER }}
+          test_ssh_key:     ${{ secrets.DEV_SSH_KEY }}
+          test_ssh_host:    ${{ secrets.DEV_SSH_HOST }}
+          test_ssh_user:    ${{ secrets.DEV_SSH_USER }}
