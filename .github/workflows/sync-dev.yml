@@ -7,17 +7,17 @@ on:
         description: 'Sync database from PROD to DEV'
         type: boolean
         required: true
-        default: false
+        default: true
       dump_prod_db:
         description: 'Dump PROD SQL database before sync'
         type: boolean
         required: true
-        default: false
+        default: true
       sync_prod_files:
         description: 'Sync public files from PROD to DEV'
         type: boolean
         required: true
-        default: false
+        default: true
 
 name: 'Sync PRODUCTION to DEV'
 jobs:
