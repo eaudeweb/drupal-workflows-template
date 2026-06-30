@@ -55,7 +55,6 @@ jobs:
           nextcloud_app_password:      ${{ secrets.NEXTCLOUD_APP_PASSWORD }}
   sync_files:
     name: 'Sync public files'
-    needs: db
     if: ${{ always() && inputs.sync_prod_files }}
     runs-on: ${{ vars.TEST_RUNNER || 'drupal-runner-v2' }}
     steps:
