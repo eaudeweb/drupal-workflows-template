@@ -28,6 +28,7 @@ jobs:
       settings_file:           ${{ vars.TEST_SETTINGS_FILE }}
       public_files_dir:        ${{ vars.TEST_PUBLIC_FILES_DIR }}
       robo_file:               ${{ vars.TEST_ROBO_FILE }}
+      local_services_file:     ${{ vars.TEST_LOCAL_SERVICES_FILE }}
       check_config:            ${{ inputs.check_config }}
       sql_backup:              ${{ inputs.sql_backup }}
       delete_release_filename: false
@@ -48,6 +49,7 @@ jobs:
       settings_file:       ${{ vars.TEST_SETTINGS_FILE }}
       public_files_dir:    ${{ vars.TEST_PUBLIC_FILES_DIR }}
       robo_file:           ${{ vars.TEST_ROBO_FILE }}
+      local_services_file: ${{ vars.TEST_LOCAL_SERVICES_FILE }}
       check_config:        ${{ inputs.check_config }}
       sql_backup:          ${{ inputs.sql_backup }}
     secrets:
