@@ -37,6 +37,7 @@ jobs:
           nextcloud_path:         ${{ vars.PROD_NEXTCLOUD_PATH }}
           nextcloud_user:         ${{ secrets.NEXTCLOUD_USER }}
           nextcloud_app_password: ${{ secrets.NEXTCLOUD_APP_PASSWORD }}
+          anonymize:              'true'
   db:
     name: 'Executing synchronization'
     needs: dump_prod
