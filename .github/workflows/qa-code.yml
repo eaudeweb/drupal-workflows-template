@@ -33,6 +33,12 @@ jobs:
         with:
           php-version: ${{ vars.PROD_PHP_VERSION }}
 
+      - name: Setup nodejs
+        if: vars.ENABLE_NODEJS == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ${{ vars.NODE_VERSION_FILE }}
+
       - name: Install dependencies
         uses: eaudeweb/drupal-install-action@1.x
         with:
