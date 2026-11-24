@@ -98,7 +98,7 @@ The `sec-composer-update.yml` workflow runs daily at 05:30 UTC and hourly on Wed
 
 1. runs `composer audit --locked`, which reads advisories from Packagist and `packages.drupal.org` (Drupal core and contrib security advisories);
 2. updates only the vulnerable packages (`drupal/core*` together, because `drupal/core-recommended` pins core dependencies), using the `PROD_PHP_VERSION` PHP version;
-3. opens or refreshes a pull request from the `security/composer-update` branch, listing the advisories, the version changes and the packages that still need a manual update (e.g. the fix exists only in a newer minor/major version than allowed by `composer.json`);
+3. opens or refreshes a pull request from the `security/composer-update` branch against the default branch, listing the advisories, the version changes and the packages that still need a manual update (e.g. the fix exists only in a newer minor/major version than allowed by `composer.json`);
 4. sends a Discord notification when the pull request is created or updated, or once a day while advisories remain unresolved.
 
 The pull request is **never merged automatically**. Before merging, deploy it on the test instance, run `drush updb` and check that custom patches still apply.
@@ -112,7 +112,6 @@ All settings are optional:
 | Name | Type | Description | Default |
 |------|------|-------------|---------|
 | `SEC_UPDATE_RUNNER`      | Variable | Runner label | `drupal-runner-v2` |
-| `SEC_UPDATE_BASE_BRANCH` | Variable | Branch to update and target of the pull request | repository default branch |
 | `SEC_UPDATE_PATCH_ONLY`  | Variable | Allow only patch-level updates (`composer update --patch-only`) | `false` |
 | `SEC_UPDATE_REVIEWERS`   | Variable | Comma-separated GitHub usernames requested as reviewers | |
 | `SECURITY_UPDATE_TOKEN`  | Secret   | PAT or GitHub App token used to open the pull request. Pull requests opened with the default `GITHUB_TOKEN` do **not** trigger other workflows (e.g. Quality assurance) | `GITHUB_TOKEN` |
