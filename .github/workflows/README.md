@@ -111,7 +111,7 @@ All settings are optional:
 
 | Name | Type | Description | Default |
 |------|------|-------------|---------|
-| `SEC_UPDATE_RUNNER`      | Variable | Runner label | `ubuntu-latest` |
+| `SEC_UPDATE_RUNNER`      | Variable | Runner label | `drupal-runner-v2` |
 | `SEC_UPDATE_BASE_BRANCH` | Variable | Branch to update and target of the pull request | repository default branch |
 | `SEC_UPDATE_PATCH_ONLY`  | Variable | Allow only patch-level updates (`composer update --patch-only`) | `false` |
 | `SEC_UPDATE_REVIEWERS`   | Variable | Comma-separated GitHub usernames requested as reviewers | |
