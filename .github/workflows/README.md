@@ -103,6 +103,8 @@ The `sec-composer-update.yml` workflow runs daily at 05:30 UTC and hourly on Wed
 
 The pull request is **never merged automatically**. Before merging, deploy it on the test instance, run `drush updb` and check that custom patches still apply.
 
+The pull request is opened with `TEMPLATE_SYNC_TOKEN`, so the Quality assurance checks run on it. Without this secret it falls back to `GITHUB_TOKEN` and no checks are triggered (close and reopen the pull request to run them).
+
 **Repository settings**: enable **Settings** → **Actions** → **General** → **Allow GitHub Actions to create and approve pull requests**, otherwise the workflow cannot open the pull request.
 
 To disable it, use **Actions** → **Security updates (composer)** → **⋯** → **Disable workflow** (the state is kept across template syncs), or add it to `.template-sync-ignore`.
@@ -113,7 +115,6 @@ All settings are optional:
 |------|------|-------------|---------|
 | `SEC_UPDATE_RUNNER`      | Variable | Runner label | `drupal-runner-v2` |
 | `SEC_UPDATE_REVIEWERS`   | Variable | Comma-separated GitHub usernames requested as reviewers | |
-| `SECURITY_UPDATE_TOKEN`  | Secret   | PAT or GitHub App token used to open the pull request. Pull requests opened with the default `GITHUB_TOKEN` do **not** trigger other workflows (e.g. Quality assurance) | `GITHUB_TOKEN` |
 | `COMPOSER_AUTH`          | Secret   | Composer authentication JSON, for private packages | |
 | `DISCORD_WEBHOOK`        | Secret   | Discord notifications (shared with the deployment workflows) | |
 

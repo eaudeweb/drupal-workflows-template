@@ -151,9 +151,9 @@ jobs:
         if: steps.audit.outputs.count != '0'
         uses: peter-evans/create-pull-request@v8
         with:
-          # PRs opened with GITHUB_TOKEN do not trigger other workflows (e.g. QA).
-          # Set SECURITY_UPDATE_TOKEN (PAT or GitHub App token) to have checks run on the PR.
-          token: ${{ secrets.SECURITY_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+          # PRs opened with GITHUB_TOKEN do not trigger other workflows (e.g. QA),
+          # so the template sync PAT is used when available.
+          token: ${{ secrets.TEMPLATE_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
           branch: security/composer-update
           delete-branch: true
           commit-message: "[Security] Update vulnerable composer packages"
