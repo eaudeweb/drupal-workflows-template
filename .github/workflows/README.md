@@ -115,7 +115,6 @@ All settings are optional:
 |------|------|-------------|---------|
 | `SEC_UPDATE_RUNNER`      | Variable | Runner label | `drupal-runner-v2` |
 | `SEC_UPDATE_REVIEWERS`   | Variable | Comma-separated GitHub usernames requested as reviewers | |
-| `COMPOSER_AUTH`          | Secret   | Composer authentication JSON, for private packages | |
 | `DISCORD_WEBHOOK`        | Secret   | Discord notifications (shared with the deployment workflows) | |
 
 > **Note**: Each job supports the `RUNNER_LABEL` variable (`${{ vars.RUNNER_LABEL }}`) to override the default runner. If not set, the default runner label `drupal-runner-v2` is used.

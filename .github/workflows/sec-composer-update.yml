@@ -26,7 +26,6 @@ jobs:
     name: 'Update vulnerable composer packages'
     runs-on: ${{ vars.SEC_UPDATE_RUNNER || 'drupal-runner-v2' }}
     env:
-      COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
       COMPOSER_NO_INTERACTION: 1
     steps:
       - name: Checkout
