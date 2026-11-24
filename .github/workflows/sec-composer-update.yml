@@ -24,7 +24,6 @@ concurrency:
 jobs:
   composer-security-update:
     name: 'Update vulnerable composer packages'
-    if: vars.SEC_UPDATE_ENABLED != 'false'
     runs-on: ${{ vars.SEC_UPDATE_RUNNER || 'ubuntu-latest' }}
     env:
       COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}

@@ -105,11 +105,12 @@ The pull request is **never merged automatically**. Before merging, deploy it on
 
 **Repository settings**: enable **Settings** → **Actions** → **General** → **Allow GitHub Actions to create and approve pull requests**, otherwise the workflow cannot open the pull request.
 
+To disable it, use **Actions** → **Security updates (composer)** → **⋯** → **Disable workflow** (the state is kept across template syncs), or add it to `.template-sync-ignore`.
+
 All settings are optional:
 
 | Name | Type | Description | Default |
 |------|------|-------------|---------|
-| `SEC_UPDATE_ENABLED`     | Variable | Set to `false` to disable the workflow | `true` |
 | `SEC_UPDATE_RUNNER`      | Variable | Runner label | `ubuntu-latest` |
 | `SEC_UPDATE_BASE_BRANCH` | Variable | Branch to update and target of the pull request | repository default branch |
 | `SEC_UPDATE_PATCH_ONLY`  | Variable | Allow only patch-level updates (`composer update --patch-only`) | `false` |
