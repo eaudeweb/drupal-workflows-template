@@ -14,6 +14,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write        # dispatch the QA workflows on the pull request branch
   contents: write
   pull-requests: write
 
@@ -150,9 +151,6 @@ jobs:
         if: steps.audit.outputs.count != '0'
         uses: peter-evans/create-pull-request@v8
         with:
-          # PRs opened with GITHUB_TOKEN do not trigger other workflows (e.g. QA),
-          # so the template sync PAT is used when available.
-          token: ${{ secrets.TEMPLATE_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
           branch: security/composer-update
           delete-branch: true
           commit-message: "[Security] Update vulnerable composer packages"
@@ -164,6 +162,24 @@ jobs:
             security
             automated
           reviewers: ${{ vars.SEC_UPDATE_REVIEWERS }}
+
+      # A pull request opened with GITHUB_TOKEN does not trigger `pull_request`
+      # workflows, but workflow_dispatch is allowed. The check runs are attached to
+      # the branch head commit, so they show up on the pull request.
+      - name: Run checks on the pull request branch
+        if: steps.cpr.outputs.pull-request-operation == 'created' || steps.cpr.outputs.pull-request-operation == 'updated'
+        env:
+          GH_API: ${{ github.api_url }}/repos/${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for WF in qa-code.yml sec-gitleaks.yml; do
+            [ -f ".github/workflows/$WF" ] || continue
+            echo "Dispatching $WF on security/composer-update"
+            curl -sS --fail-with-body -X POST \
+              -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+              "$GH_API/actions/workflows/$WF/dispatches" -d '{"ref":"security/composer-update"}' \
+              || echo "::warning::Could not dispatch $WF"
+          done
 
       - name: 'Discord notification'
         if: steps.audit.outputs.count != '0'

@@ -103,7 +103,7 @@ The `sec-composer-update.yml` workflow runs daily at 05:30 UTC and hourly on Wed
 
 The pull request is **never merged automatically**. Before merging, deploy it on the test instance, run `drush updb` and check that custom patches still apply.
 
-The pull request is opened with `TEMPLATE_SYNC_TOKEN`, so the Quality assurance checks run on it. Without this secret it falls back to `GITHUB_TOKEN` and no checks are triggered (close and reopen the pull request to run them).
+No extra token is needed: the pull request is opened with `GITHUB_TOKEN`, which does not trigger `pull_request` workflows, so the workflow dispatches `qa-code.yml` and `sec-gitleaks.yml` (when present) on the pull request branch.
 
 **Repository settings**: enable **Settings** → **Actions** → **General** → **Allow GitHub Actions to create and approve pull requests**, otherwise the workflow cannot open the pull request.
 
