@@ -63,14 +63,11 @@ jobs:
 
       - name: Update vulnerable packages
         if: steps.audit.outputs.count != '0'
-        env:
-          PATCH_ONLY: ${{ vars.SEC_UPDATE_PATCH_ONLY || 'false' }}
         run: |
           # Resolve for the production PHP version, but do not require every PHP
           # extension used in production to be present on the runner.
           # --minimal-changes: touch transitive dependencies only when required.
           OPTS=(--minimal-changes --no-progress --ignore-platform-req='ext-*' --ignore-platform-req='lib-*')
-          if [ "$PATCH_ONLY" = "true" ]; then OPTS+=(--patch-only); fi
 
           # Each update is attempted separately: when no secure version fits the
           # constraints, composer refuses to resolve (insecure versions are blocked).

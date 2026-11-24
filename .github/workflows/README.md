@@ -112,7 +112,6 @@ All settings are optional:
 | Name | Type | Description | Default |
 |------|------|-------------|---------|
 | `SEC_UPDATE_RUNNER`      | Variable | Runner label | `drupal-runner-v2` |
-| `SEC_UPDATE_PATCH_ONLY`  | Variable | Allow only patch-level updates (`composer update --patch-only`) | `false` |
 | `SEC_UPDATE_REVIEWERS`   | Variable | Comma-separated GitHub usernames requested as reviewers | |
 | `SECURITY_UPDATE_TOKEN`  | Secret   | PAT or GitHub App token used to open the pull request. Pull requests opened with the default `GITHUB_TOKEN` do **not** trigger other workflows (e.g. Quality assurance) | `GITHUB_TOKEN` |
 | `COMPOSER_AUTH`          | Secret   | Composer authentication JSON, for private packages | |
