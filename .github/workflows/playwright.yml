@@ -1,0 +1,176 @@
+name: 'Playwright tests'
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy TEST instance']
+    types: [completed]
+
+permissions:
+  contents: read
+
+env:
+  PLAYWRIGHT_DIR: ${{ vars.PLAYWRIGHT_DIR || 'playwright' }}
+
+jobs:
+  visual:
+    name: 'Visual tests'
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    timeout-minutes: 180
+    runs-on: docker # see https://helpdesk.eaudeweb.ro/issues/38046
+    env:
+      TEST_URL: ${{ vars.TEST_URL }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ${{ env.PLAYWRIGHT_DIR }}/.nvmrc
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ env.PLAYWRIGHT_DIR }}
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+        working-directory: ${{ env.PLAYWRIGHT_DIR }}
+      - name: Download reference baselines from Nextcloud
+        run: bin/baselines.sh pull
+        working-directory: ${{ env.PLAYWRIGHT_DIR }}
+        env:
+          NEXTCLOUD_USER: ${{ secrets.NEXTCLOUD_USER }}
+          NEXTCLOUD_APP_PASSWORD: ${{ secrets.NEXTCLOUD_APP_PASSWORD }}
+          NEXTCLOUD_BASE_URL: ${{ vars.NEXTCLOUD_BASE_URL }}
+          NEXTCLOUD_PATH: ${{ vars.PROD_NEXTCLOUD_PATH }}
+        shell: bash
+      - name: Run Playwright tests
+        run: npx playwright test --project=test
+        working-directory: ${{ env.PLAYWRIGHT_DIR }}
+        env:
+          TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      - name: Zip Playwright report
+        if: always()
+        run: |
+          cd "$PLAYWRIGHT_DIR"
+          zip -r playwright-report.zip playwright-report/ \
+            --exclude "*.webm" \
+            --exclude "*.zip" \
+            --exclude "*.mp4"
+      - name: Upload Playwright report to Nextcloud
+        if: always()
+        env:
+          NEXTCLOUD_USER: ${{ secrets.NEXTCLOUD_USER }}
+          NEXTCLOUD_APP_PASSWORD: ${{ secrets.NEXTCLOUD_APP_PASSWORD }}
+          NEXTCLOUD_BASE_URL: ${{ vars.NEXTCLOUD_BASE_URL }}
+          NEXTCLOUD_PATH: ${{ vars.TEST_NEXTCLOUD_PATH }}
+        run: |
+          set -euo pipefail
+          TARGET_URL="${NEXTCLOUD_BASE_URL}/remote.php/dav/files/${NEXTCLOUD_USER}/${NEXTCLOUD_PATH}/playwright/playwright-report.zip"
+          echo "Uploading to: $TARGET_URL"
+          curl --fail -sS \
+            -u "${NEXTCLOUD_USER}:${NEXTCLOUD_APP_PASSWORD}" \
+            -T "${PLAYWRIGHT_DIR}/playwright-report.zip" \
+            "$TARGET_URL"
+          echo "Upload completed."
+        shell: bash
+
+  # The accessibility checks only run when the Playwright project has an
+  # accessibility config.
+  accessibility_check:
+    name: 'Check if accessibility is set up'
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: docker # see https://helpdesk.eaudeweb.ro/issues/38046
+    outputs:
+      found: ${{ steps.config.outputs.found }}
+    steps:
+      - name: Checkout the accessibility config
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+
+      - name: Look for the accessibility config
+        id: config
+        shell: bash
+        run: |
+          if [ -f "${PLAYWRIGHT_DIR}/playwright.a11y.config.ts" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "${PLAYWRIGHT_DIR}/playwright.a11y.config.ts not found, so the accessibility checks are skipped."
+          fi
+
+  accessibility:
+    name: 'Accessibility checks'
+    needs: accessibility_check
+    if: needs.accessibility_check.outputs.found == 'true'
+    runs-on: docker # see https://helpdesk.eaudeweb.ro/issues/38046
+    concurrency:
+      group: ${{ github.workflow }}-accessibility-${{ github.ref }}
+      cancel-in-progress: true
+    defaults:
+      run:
+        working-directory: ${{ env.PLAYWRIGHT_DIR }}
+    env:
+      CI: 'true'
+      TEST_URL: ${{ vars.TEST_URL }}
+      TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+    steps:
+      # The code that was deployed, so the checks and baselines match the site.
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+
+      - name: Setup nodejs
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ${{ env.PLAYWRIGHT_DIR }}/.nvmrc
+          cache: npm
+          cache-dependency-path: ${{ env.PLAYWRIGHT_DIR }}/package-lock.json
+
+      # Pa11y runs in the Chromium that Playwright installs, so Puppeteer does
+      # not need to download its own.
+      - name: Install dependencies
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Check with axe
+        run: npm run a11y
+
+      # Pa11y only writes to the console, so its output is kept in a file to
+      # go with the report.
+      - name: Check with Pa11y
+        if: ${{ !cancelled() }}
+        run: npm run pa11y 2>&1 | tee pa11y-output.txt
+        shell: bash
+
+      - name: Zip the report
+        if: ${{ !cancelled() }}
+        run: zip -qr playwright-report-a11y.zip playwright-report-a11y/ a11y-output/ pa11y-output.txt
+
+      - name: Upload the report to Nextcloud
+        if: ${{ !cancelled() }}
+        env:
+          NEXTCLOUD_USER: ${{ secrets.NEXTCLOUD_USER }}
+          NEXTCLOUD_APP_PASSWORD: ${{ secrets.NEXTCLOUD_APP_PASSWORD }}
+          NEXTCLOUD_BASE_URL: ${{ vars.NEXTCLOUD_BASE_URL }}
+          NEXTCLOUD_PATH: ${{ vars.TEST_NEXTCLOUD_PATH }}
+        run: |
+          set -euo pipefail
+          TARGET_URL="${NEXTCLOUD_BASE_URL}/remote.php/dav/files/${NEXTCLOUD_USER}/${NEXTCLOUD_PATH}/playwright/playwright-report-a11y.zip"
+          echo "Uploading to: $TARGET_URL"
+          curl --fail -sS \
+            -u "${NEXTCLOUD_USER}:${NEXTCLOUD_APP_PASSWORD}" \
+            -T playwright-report-a11y.zip \
+            "$TARGET_URL"
+          echo "Upload completed."
+        shell: bash

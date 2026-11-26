@@ -1,0 +1,47 @@
+name: Refresh Playwright Visual Baselines
+on:
+  workflow_dispatch:
+  workflow_call:
+  workflow_run:
+    workflows: ['Sync PRODUCTION to TEST', 'Dump PROD SQL database']
+    types: [completed]
+env:
+  PLAYWRIGHT_DIR: ${{ vars.PLAYWRIGHT_DIR || 'playwright' }}
+jobs:
+  baseline:
+    name: Capture and publish reference screenshots
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    timeout-minutes: 180
+    # runs-on: ubuntu-latest
+    runs-on: docker # see https://helpdesk.eaudeweb.ro/issues/38046
+    env:
+      PROD_URL: ${{ vars.PROD_URL }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ${{ env.PLAYWRIGHT_DIR }}/.nvmrc
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ env.PLAYWRIGHT_DIR }}
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+        working-directory: ${{ env.PLAYWRIGHT_DIR }}
+      - name: Capture reference screenshots
+        run: npm run reference
+        working-directory: ${{ env.PLAYWRIGHT_DIR }}
+        env:
+          PROD_USERNAME: ${{ secrets.PROD_USERNAME }}
+          PROD_PASSWORD: ${{ secrets.PROD_PASSWORD }}
+      - name: Publish reference screenshots to Nextcloud
+        run: bin/baselines.sh push
+        working-directory: ${{ env.PLAYWRIGHT_DIR }}
+        env:
+          NEXTCLOUD_USER: ${{ secrets.NEXTCLOUD_USER }}
+          NEXTCLOUD_APP_PASSWORD: ${{ secrets.NEXTCLOUD_APP_PASSWORD }}
+          NEXTCLOUD_BASE_URL: ${{ vars.NEXTCLOUD_BASE_URL }}
+          NEXTCLOUD_PATH: ${{ vars.PROD_NEXTCLOUD_PATH }}
+          BASELINE_SOURCE: ${{ env.PROD_URL }}
+        shell: bash
